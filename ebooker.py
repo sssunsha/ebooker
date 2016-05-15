@@ -2,6 +2,7 @@
 import sys
 import urllib2
 import json
+import time
 
 # Book Search
 #
@@ -60,6 +61,7 @@ def start_search(keyword):
     do_search(url)
 
 def do_search(url):
+    time.sleep(0.5) #avoid the request be blocked by the server
     # just print the searching url
     print "do search : " + url
     response = urllib2.urlopen(url)
@@ -81,6 +83,8 @@ def parse_search_content(content):
             if c[a] == '0':
                 print "finish searching"
                 return # finishe the parsing
+            else:
+                print "Total : " + c[a]
 
         # elif a == 'Page':
         #     print 'Page : ' + str(c[a])
@@ -88,6 +92,7 @@ def parse_search_content(content):
         elif a == 'Books':
             print 'Books count: ' + str(len(c[a]))
             for b in c[a]:
+                do_generate_reporter(b)
                 print "Title : " + b["Title"]
                 # print "SubTitle : " + b["SubTitle"]
                 # print "Description : " + b["Description"]
@@ -98,9 +103,9 @@ def parse_search_content(content):
     search_book_pages = search_book_pages + 1
     start_search(search_keyword)
 
-
-
-
+def do_generate_reporter(book):
+#start to write the parsing content to the file for report
+    print "..."
 
 
 
