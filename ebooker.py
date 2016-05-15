@@ -1,6 +1,8 @@
 # main python file for the tool ebooker
 import sys
 import urllib2
+import json
+
 # Book Search
 #
 # Request
@@ -23,11 +25,12 @@ import urllib2
 
 
 #some constant value
-ebook_website = "http://it-ebooks-api.info//v1"
+ebook_website = "http://it-ebooks-api.info/v1"
 search_request_query = "/search/"
 search_request_page = "/page/"
 
-
+search_book_pages = 1
+search_keyword = ""
 
 # the main function
 def main(argv):
@@ -47,18 +50,18 @@ def handle_search():
     keyword = raw_input("keyword:")
     print "the keyword you input is :" + keyword
     print "start search on the ebook website ..."
+    global search_keyword
+    search_keyword = keyword
     start_search(keyword)
 
 
 def start_search(keyword):
-    print "start search : " + keyword
-
-    url = ebook_website + search_request_query + keyword
+    url = ebook_website + search_request_query + keyword + search_request_page + str(search_book_pages)
     do_search(url)
 
 def do_search(url):
     # just print the searching url
-    print "dp search : " + url
+    print "do search : " + url
     response = urllib2.urlopen(url)
     content = response.read()
     # here the cotent is the response search list
@@ -67,6 +70,38 @@ def do_search(url):
 
 def parse_search_content(content):
     print "parse search content"
+    c = json.loads(content)
+    for a in c:
+        if a == 'Error':
+            if c[a] != '0':
+                print 'Error :' + c[a]
+                return
+
+        elif a == 'Total':
+            if c[a] == '0':
+                print "finish searching"
+                return # finishe the parsing
+
+        # elif a == 'Page':
+        #     print 'Page : ' + str(c[a])
+
+        elif a == 'Books':
+            print 'Books count: ' + str(len(c[a]))
+            for b in c[a]:
+                print "Title : " + b["Title"]
+                # print "SubTitle : " + b["SubTitle"]
+                # print "Description : " + b["Description"]
+                # print "ID : " + str(b["ID"])
+                print "isbn : " + b["isbn"]
+    # start to next page search
+    global search_book_pages
+    search_book_pages = search_book_pages + 1
+    start_search(search_keyword)
+
+
+
+
+
 
 
 if __name__=="__main__":
